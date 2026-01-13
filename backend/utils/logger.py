@@ -17,7 +17,7 @@ def setup_logging(log_level: str = "INFO"):
     
     # Get today's date for filename (format: 202X-xx-xx)
     today = datetime.now().strftime("%Y-%m-%d")
-    log_file = log_dir /f"logs/sync_{today}.log"
+    log_file = log_dir / f"sync_{today}.log"
     
     
     file_handler = logging.FileHandler(log_file)
