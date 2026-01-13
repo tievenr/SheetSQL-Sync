@@ -19,9 +19,9 @@ class Change:
     """Represents a single change detected in either data source."""
     operation: Operation
     primary_key_value: Any
+    source: Source
     data: Dict[str,Any] = field(default_factory=dict)  
     timestamp: datetime=field(default_factory=datetime.now)
-    source: Source
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
