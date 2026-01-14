@@ -118,4 +118,29 @@ class MySQLClient:
             logger.error("mysql_delete_failed", error=str(e), table=self.table, pk=pk_value)
             raise
 
+    def get_schema(self) -> Dict[str, str]:
+        """Get column names and their data types."""
+
+        try:
+            #This is useful for type conversions when syncing with sheets
+            query = """
+                SELECT COLUMN_NAME, DATA_TYPE 
+                FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_SCHEMA = :database 
+                AND TABLE_NAME = :table
+            """
+            
+            with self.engine.connect() as conn:
+                result = conn.execute(
+                    text(query), 
+                    {'database': self.database, 'table': self.table}
+                )
+                schema = {row[0]: row[1] for row in result}
+            
+            logger.info("mysql_schema_fetched", table=self.table, columns=len(schema))
+            return schema
+        except Exception as e:
+            logger.error("mysql_schema_failed", error=str(e), table=self.table)
+            raise
+
 

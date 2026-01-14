@@ -2,11 +2,15 @@ from backend.clients.mysql_client import MySQLClient
 
 client = MySQLClient()
 
-# Update row 1's email
-client.update_row(1, {'email': 'updated@gmail.com'})
-print("✅ Updated row 1")
+print("Before delete:")
+print(f"Total rows: {len(client.get_all_data())}")
 
-# Verify the change
+# Delete row 5 (May)
+client.delete_row(5)
+print("\n✅ Deleted row 5")
+
+print("\nAfter delete:")
 df = client.get_all_data()
-print("\nRow 1 after update:")
-print(df[df['id'] == 1])
+print(f"Total rows: {len(df)}")
+print("\nRemaining data:")
+print(df)
