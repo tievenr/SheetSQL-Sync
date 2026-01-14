@@ -101,3 +101,21 @@ class MySQLClient:
             logger.error("mysql_update_failed", error=str(e), table=self.table, pk=pk_value)
             raise
 
+    def delete_row(self,pk_value:Any)->None:
+        """Delete a row by primary key."""
+        try:
+            query = f"DELETE FROM {self.table} WHERE {self.primary_key} = :pk_value"
+            
+            with self.engine.begin() as conn:
+                result = conn.execute(text(query), {'pk_value': pk_value})
+                rows_deleted = result.rowcount
+            
+            if rows_deleted == 0:
+                logger.warning("mysql_delete_no_rows", table=self.table, pk=pk_value)
+            else:
+                logger.info("mysql_row_deleted", table=self.table, pk=pk_value)
+        except Exception as e:
+            logger.error("mysql_delete_failed", error=str(e), table=self.table, pk=pk_value)
+            raise
+
+
