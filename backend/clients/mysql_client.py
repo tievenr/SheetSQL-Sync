@@ -142,6 +142,7 @@ class MySQLClient:
         except Exception as e:
             logger.error("mysql_schema_failed", error=str(e), table=self.table)
             raise
+        
     def close(self) -> None:
         """Close the database connection pool."""
         try:
