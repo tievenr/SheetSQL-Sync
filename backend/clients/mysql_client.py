@@ -142,6 +142,33 @@ class MySQLClient:
         except Exception as e:
             logger.error("mysql_schema_failed", error=str(e), table=self.table)
             raise
+
+            
+    def write_all(self, df: pd.DataFrame) -> None:
+        """
+        Overwrite all data in the table with DataFrame contents.
+        Clears table first, then bulk inserts all rows.
+        """
+        try:
+            with self.engine.begin() as conn:
+                # Clear existing data
+                conn.execute(text(f"DELETE FROM {self.table}"))
+                logger.info("mysql_table_cleared", table=self.table)
+                
+                # Bulk insert using pandas to_sql
+                df.to_sql(
+                    name=self.table,
+                    con=conn,
+                    if_exists='append',
+                    index=False,
+                    method='multi'
+                )
+            
+            logger.info("mysql_write_all_success", rows=len(df), table=self.table)
+            
+        except Exception as e:
+            logger.error("mysql_write_all_failed", error=str(e), rows=len(df))
+            raise
         
     def close(self) -> None:
         """Close the database connection pool."""
