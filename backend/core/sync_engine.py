@@ -105,7 +105,7 @@ class SyncEngine:
             logger.error("initial_sync_failed", error=str(e))
             raise
     
-    def _apply_changes(self, changes: list[Change], target: str) -> None:
+    def _apply_changes(self, changes: list[Change], target: str) -> int:
         """
         Apply changes to target system.
         
@@ -114,9 +114,10 @@ class SyncEngine:
             target: 'mysql' or 'sheets'
         """
         if not changes:
-            return
+            return 0
         
         client = self.mysql_client if target == "mysql" else self.sheets_client
+        success_count=0
         
         for change in changes:
             try:
@@ -149,6 +150,7 @@ class SyncEngine:
                         operation=change.operation.value,
                         pk=change.primary_key_value,
                         target=target)
+                success_count+=1
                         
             except Exception as e:
                 logger.error("change_apply_failed",
@@ -156,10 +158,8 @@ class SyncEngine:
                             pk=change.primary_key_value,
                             target=target,
                             error=str(e))
-                # Stop sync on any error
-                self.status.is_running = False
-                self.status.last_error = str(e)
-                raise
+                continue
+        return success_count
     
 
     def _sync_cycle(self) -> None:
