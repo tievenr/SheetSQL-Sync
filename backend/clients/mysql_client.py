@@ -84,7 +84,7 @@ class MySQLClient:
             raise
     
 
-    def update_row(self,pk_value:Any, data:Dict[str,Any])->None:
+    def update_row_by_pk(self,pk_value:Any, data:Dict[str,Any])->None:
         """Update an existing row by primary key"""
         try:
             # set clause to check if email=:email , status =:status
@@ -101,7 +101,7 @@ class MySQLClient:
             logger.error("mysql_update_failed", error=str(e), table=self.table, pk=pk_value)
             raise
 
-    def delete_row(self,pk_value:Any)->None:
+    def delete_row_by_pk(self,pk_value:Any)->None:
         """Delete a row by primary key."""
         try:
             query = f"DELETE FROM {self.table} WHERE {self.primary_key} = :pk_value"
@@ -143,7 +143,7 @@ class MySQLClient:
             logger.error("mysql_schema_failed", error=str(e), table=self.table)
             raise
 
-            
+
     def write_all(self, df: pd.DataFrame) -> None:
         """
         Overwrite all data in the table with DataFrame contents.
@@ -178,5 +178,7 @@ class MySQLClient:
         except Exception as e:
             logger.error("mysql_close_failed", error=str(e))
             raise
+    
+
 
 
