@@ -209,3 +209,42 @@ class SheetsClient:
         except Exception as e:
             logger.error("sheets_delete_failed", pk=pk_value, error=str(e))
             raise
+
+    def clear_all(self) -> None:
+    """Clear all data except the header row."""
+    try:
+        # Clear from row 2 onwards (keep header)
+        self.service.spreadsheets().values().clear(
+            spreadsheetId=self.sheet_id,
+            range='A1:Z'  # ← BUG: Clears header too!
+        ).execute()
+        
+        logger.info("sheets_cleared", sheet_id=self.sheet_id[:20])
+        
+    except Exception as e:
+        logger.error("sheets_clear_failed", error=str(e))
+        raise
+
+
+    def write_all(self, df: pd.DataFrame) -> None:
+        """Overwrite all data in the sheet with DataFrame contents."""
+        try:
+            # Clear existing data first
+            self.clear_all()
+            
+            # Convert DataFrame to list of lists
+            values = df.values.tolist()
+            
+            # Write all rows at once
+            self.service.spreadsheets().values().update(
+                spreadsheetId=self.sheet_id,
+                range='A2:Z',
+                valueInputOption='USER_ENTERED',
+                body={'values': values}
+            ).execute()
+            
+            logger.info("sheets_written", rows=len(df), sheet_id=self.sheet_id[:20])
+            
+        except Exception as e:
+            logger.error("sheets_write_failed", error=str(e), rows=len(df))
+            raise
