@@ -71,3 +71,32 @@ class SheetsClient:
         service = build('sheets', 'v4', credentials=creds)
         logger.info("sheets_authenticated", token_exists=os.path.exists(self.token_path))
         return service
+
+    def get_all_data(self) -> pd.DataFrame:
+        """Fetch all data from the sheet as a DataFrame."""
+        try:
+            # Read all values from the sheet
+            result = self.service.spreadsheets().values().get(
+                spreadsheetId=self.sheet_id,
+                range='A:Z'  # Get all columns, all rows
+            ).execute()
+            
+            values = result.get('values', [])
+            
+            if not values:
+                logger.warning("sheets_empty", sheet_id=self.sheet_id[:20])
+                return pd.DataFrame()
+            
+            # First row is header, rest is data
+            headers = values[0]
+            data_rows = values[1:]
+            
+            # Convert to DataFrame
+            df = pd.DataFrame(data_rows, columns=headers)
+            
+            logger.info("sheets_data_fetched", rows=len(df), sheet_id=self.sheet_id[:20])
+            return df
+            
+        except HttpError as e:
+            logger.error("sheets_fetch_failed", error=str(e), sheet_id=self.sheet_id[:20])
+            raise
