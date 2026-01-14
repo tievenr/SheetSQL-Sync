@@ -124,7 +124,10 @@ class SyncEngine:
                     client.insert_row(change.data)
                     
                 elif change.operation == Operation.UPDATE:
-                    # BUG: Not adding timestamp to change.data before applying!
+                    update_data = change.data.copy()
+                    if target == "sheets" and "last_modified" not in update_data:
+                        update_data["last_modified"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                
                     client.update_row_by_pk(change.primary_key_value, change.data)
                     
                 elif change.operation == Operation.DELETE:
