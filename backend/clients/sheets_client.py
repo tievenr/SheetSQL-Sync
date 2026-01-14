@@ -117,3 +117,37 @@ class SheetsClient:
         except Exception as e:
             logger.error("sheets_find_row_failed", pk=pk_value, error=str(e))
             raise
+
+    def update_row_by_pk(self, pk_value: Any, data: Dict[str, Any]) -> None:
+        """Update an existing row by primary key value."""
+        try:
+            # Find which row number has this primary key
+            row_num = self._find_row_by_pk(pk_value)
+            
+            # Get headers to know column positions
+            result = self.service.spreadsheets().values().get(
+                spreadsheetId=self.sheet_id,
+                range='A1:Z1'
+            ).execute()
+            headers = result.get('values', [[]])[0]
+            
+            # Build update for each column that changed
+            for column_name, new_value in data.items():
+                if column_name in headers:
+                    col_index = headers.index(column_name)
+                    col_letter = chr(65 + col_index)  # A=65, B=66, etc.
+                    
+                    # Update single cell
+                    self.service.spreadsheets().values().update(
+                        spreadsheetId=self.sheet_id,
+                        range=f"{col_letter}{row_num}",
+                        valueInputOption='USER_ENTERED',
+                        body={'values': [[new_value]]}
+                    ).execute()
+            
+            logger.info("sheets_row_updated", pk=pk_value, row=row_num, 
+                        updated_fields=list(data.keys()))
+            
+        except Exception as e:
+            logger.error("sheets_update_failed", pk=pk_value, error=str(e))
+            raise
