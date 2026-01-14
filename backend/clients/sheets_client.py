@@ -151,3 +151,32 @@ class SheetsClient:
         except Exception as e:
             logger.error("sheets_update_failed", pk=pk_value, error=str(e))
             raise
+
+    def insert_row(self, data: Dict[str, Any]) -> None:
+        """Insert a new row at the end of the sheet."""
+        try:
+            # Get headers to know column order
+            result = self.service.spreadsheets().values().get(
+                spreadsheetId=self.sheet_id,
+                range='A1:Z1'
+            ).execute()
+            headers = result.get('values', [[]])[0]
+            
+            # Build row values in correct column order
+            row_values = []
+            for header in headers:
+                row_values.append(data.get(header, ''))  # Empty string if not provided
+            
+            # Append row to end
+            self.service.spreadsheets().values().append(
+                spreadsheetId=self.sheet_id,
+                range='A:Z',
+                valueInputOption='USER_ENTERED',
+                body={'values': [row_values]}
+            ).execute()
+            
+            logger.info("sheets_row_inserted", data=data)
+            
+        except Exception as e:
+            logger.error("sheets_insert_failed", error=str(e), data=data)
+            raise
