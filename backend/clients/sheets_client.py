@@ -90,7 +90,7 @@ class SheetsClient:
             # First row is header, rest is data
             headers = values[0]
             data_rows = values[1:]
-            
+
             # Pad rows to match header length (Sheets API omits trailing empty cells)
             padded_rows = []
             for row in data_rows:
@@ -98,7 +98,7 @@ class SheetsClient:
                 padded_rows.append(padded_row)
             
             # Convert to DataFrame
-            df = pd.DataFrame(data_rows, columns=headers)
+            df = pd.DataFrame(padded_rows, columns=headers)
             
             logger.info("sheets_data_fetched", rows=len(df), sheet_id=self.sheet_id[:20])
             return df
