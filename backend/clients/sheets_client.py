@@ -211,19 +211,19 @@ class SheetsClient:
             raise
 
     def clear_all(self) -> None:
-    """Clear all data except the header row."""
-    try:
-        # Clear from row 2 onwards (keep header)
-        self.service.spreadsheets().values().clear(
-            spreadsheetId=self.sheet_id,
-            range='A2:Z'  
-        ).execute()
-        
-        logger.info("sheets_cleared", sheet_id=self.sheet_id[:20])
-        
-    except Exception as e:
-        logger.error("sheets_clear_failed", error=str(e))
-        raise
+        """Clear all data except the header row."""
+        try:
+            # Clear from row 2 onwards (keep header)
+            self.service.spreadsheets().values().clear(
+                spreadsheetId=self.sheet_id,
+                range='A2:Z'  
+            ).execute()
+            
+            logger.info("sheets_cleared", sheet_id=self.sheet_id[:20])
+            
+        except Exception as e:
+            logger.error("sheets_clear_failed", error=str(e))
+            raise
 
 
     def write_all(self, df: pd.DataFrame) -> None:
