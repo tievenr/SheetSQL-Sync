@@ -121,6 +121,18 @@ class SyncEngine:
         for change in changes:
             try:
                 if change.operation == Operation.INSERT:
+                    # Skip incomplete rows (user still typing in Sheets)
+                    if target == "mysql":
+                        required = ['id', 'name', 'email']
+                        if not all(change.data.get(f) for f in required):
+                            logger.warning("skipping_incomplete_row", 
+                                        pk=change.primary_key_value,
+                                        data=change.data)
+                            continue
+                        # Default status if empty
+                        if not change.data.get('status'):
+                            change.data['status'] = 'active'
+                    
                     client.insert_row(change.data)
                     
                 elif change.operation == Operation.UPDATE:
