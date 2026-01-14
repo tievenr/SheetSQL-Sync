@@ -128,7 +128,7 @@ class SyncEngine:
                     if target == "sheets" and "last_modified" not in update_data:
                         update_data["last_modified"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 
-                    client.update_row_by_pk(change.primary_key_value, change.data)
+                    client.update_row_by_pk(change.primary_key_value, update_data)
                     
                 elif change.operation == Operation.DELETE:
                     client.delete_row_by_pk(change.primary_key_value)
@@ -148,3 +148,79 @@ class SyncEngine:
                 self.status.is_running = False
                 self.status.last_error = str(e)
                 raise
+    
+
+    def _sync_cycle(self) -> None:
+        """
+        Perform one sync cycle:
+        1. Fetch current data from both systems
+        2. Detect changes since last snapshot
+        3. Resolve conflicts
+        4. Apply changes to target systems
+        5. Update snapshots
+        """
+        try:
+            # 1. Fetch current data
+            current_mysql = self.mysql_client.get_all_data()
+            current_sheets = self.sheets_client.get_all_data()
+            
+            # 2. Detect changes
+            mysql_changes = self.change_detector.detect_changes(
+                self.mysql_snapshot,
+                current_mysql,
+                Source.MYSQL
+            )
+            
+            sheets_changes = self.change_detector.detect_changes(
+                self.sheets_snapshot,
+                current_sheets,
+                Source.SHEETS
+            )
+            
+            # Add timestamps to changes
+            for change in mysql_changes:
+                if change.operation in (Operation.INSERT, Operation.UPDATE):
+                    # Extract timestamp from current data
+                    row = current_mysql[current_mysql['id'].astype(str) == str(change.primary_key_value)]
+                    if not row.empty and 'last_modified' in row.columns:
+                        change.data['last_modified'] = row.iloc[0]['last_modified']
+            
+            for change in sheets_changes:
+                if change.operation in (Operation.INSERT, Operation.UPDATE):
+                    # Extract timestamp from current data
+                    row = current_sheets[current_sheets['id'].astype(str) == str(change.primary_key_value)]
+                    if not row.empty and 'last_modified' in row.columns:
+                        change.data['last_modified'] = row.iloc[0]['last_modified']
+            
+            # 3. Resolve conflicts
+            resolved_sheets, resolved_mysql = self.conflict_resolver.resolve_conflicts(
+                sheets_changes,
+                mysql_changes
+            )
+            
+            conflicts_count = len(sheets_changes) + len(mysql_changes) - len(resolved_sheets) - len(resolved_mysql)
+            self.status.conflicts_resolved += conflicts_count
+            
+            # 4. Apply changes
+            self._apply_changes(resolved_sheets, target="mysql")
+            self._apply_changes(resolved_mysql, target="sheets")
+            
+            # 5. Update snapshots
+            self.mysql_snapshot = current_mysql.copy()
+            self.sheets_snapshot = current_sheets.copy()
+            
+            # Update status
+            self.status.last_sync_time = datetime.now()
+            self.status.sync_count += 1
+            
+            logger.info("sync_cycle_complete",
+                    sync_count=self.status.sync_count,
+                    mysql_changes=len(resolved_mysql),
+                    sheets_changes=len(resolved_sheets),
+                    conflicts=conflicts_count)
+            
+        except Exception as e:
+            logger.error("sync_cycle_failed", error=str(e))
+            self.status.is_running = False
+            self.status.last_error = str(e)
+            raise
