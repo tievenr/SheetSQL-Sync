@@ -82,3 +82,22 @@ class MySQLClient:
         except Exception as e:
             logger.error("mysql_insert_failed", error=str(e),table=self.table)
             raise
+    
+
+    def update_row(self,pk_value:Any, data:Dict[str,Any])->None:
+        """Update an existing row by primary key"""
+        try:
+            # set clause to check if email=:email , status =:status
+            set_clause = ', '.join([f"{key} = :{key}" for key in data.keys()])
+
+            query = f"UPDATE {self.table} SET {set_clause} WHERE {self.primary_key} = :pk_value"
+
+            params = {**data, 'pk_value': pk_value}
+            with self.engine.begin() as conn:
+                conn.execute(text(query), params)
+        
+            logger.info("mysql_row_updated", table=self.table, pk=pk_value, updated_fields=list(data.keys()))
+        except Exception as e:
+            logger.error("mysql_update_failed", error=str(e), table=self.table, pk=pk_value)
+            raise
+

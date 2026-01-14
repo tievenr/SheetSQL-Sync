@@ -2,17 +2,11 @@ from backend.clients.mysql_client import MySQLClient
 
 client = MySQLClient()
 
-# Insert a new row
-new_id = client.insert_row({
-    'name': 'June',
-    'email': 'testjn@gmail.com',
-    'status': 'active'
-})
+# Update row 1's email
+client.update_row(1, {'email': 'updated@gmail.com'})
+print("✅ Updated row 1")
 
-print(f"✅ Inserted row with ID: {new_id}")
-
-# Verify it's there
+# Verify the change
 df = client.get_all_data()
-print(f"\nTotal rows: {len(df)}")
-print("\nLast row:")
-print(df)
+print("\nRow 1 after update:")
+print(df[df['id'] == 1])
