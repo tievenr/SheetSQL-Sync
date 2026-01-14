@@ -180,3 +180,32 @@ class SheetsClient:
         except Exception as e:
             logger.error("sheets_insert_failed", error=str(e), data=data)
             raise
+    
+    def delete_row_by_pk(self, pk_value: Any) -> None:
+        """Delete a row by primary key value."""
+        try:
+            # Find which row number to delete
+            row_num = self._find_row_by_pk(pk_value)
+            
+            # Delete the row using batchUpdate
+            self.service.spreadsheets().batchUpdate(
+                spreadsheetId=self.sheet_id,
+                body={
+                    'requests': [{
+                        'deleteDimension': {
+                            'range': {
+                                'sheetId': 0,  # First sheet
+                                'dimension': 'ROWS',
+                                'startIndex': row_num - 1,  # 0-indexed for API
+                                'endIndex': row_num
+                            }
+                        }
+                    }]
+                }
+            ).execute()
+            
+            logger.info("sheets_row_deleted", pk=pk_value, row=row_num)
+            
+        except Exception as e:
+            logger.error("sheets_delete_failed", pk=pk_value, error=str(e))
+            raise
