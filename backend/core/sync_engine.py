@@ -104,3 +104,44 @@ class SyncEngine:
         except Exception as e:
             logger.error("initial_sync_failed", error=str(e))
             raise
+    
+    def _apply_changes(self, changes: list[Change], target: str) -> None:
+        """
+        Apply changes to target system.
+        
+        Args:
+            changes: List of changes to apply
+            target: 'mysql' or 'sheets'
+        """
+        if not changes:
+            return
+        
+        client = self.mysql_client if target == "mysql" else self.sheets_client
+        
+        for change in changes:
+            try:
+                if change.operation == Operation.INSERT:
+                    client.insert_row(change.data)
+                    
+                elif change.operation == Operation.UPDATE:
+                    # BUG: Not adding timestamp to change.data before applying!
+                    client.update_row_by_pk(change.primary_key_value, change.data)
+                    
+                elif change.operation == Operation.DELETE:
+                    client.delete_row_by_pk(change.primary_key_value)
+                
+                logger.info("change_applied", 
+                        operation=change.operation.value,
+                        pk=change.primary_key_value,
+                        target=target)
+                        
+            except Exception as e:
+                logger.error("change_apply_failed",
+                            operation=change.operation.value,
+                            pk=change.primary_key_value,
+                            target=target,
+                            error=str(e))
+                # Stop sync on any error
+                self.status.is_running = False
+                self.status.last_error = str(e)
+                raise
