@@ -82,20 +82,20 @@ class ConflictResolver:
         return resolved_sheets, resolved_mysql
 
 
-        def _parse_timestamp(self, timestamp: str) -> datetime:
-            """Parse timestamp string to datetime object."""
-            # Handle common formats
-            formats = [
-                '%Y-%m-%d %H:%M:%S',
-                '%Y-%m-%d %H:%M:%S.%f',
-                '%Y-%m-%dT%H:%M:%S',
-                '%Y-%m-%dT%H:%M:%S.%f'
-            ]
-            
-            for fmt in formats:
-                try:
-                    return datetime.strptime(str(timestamp), fmt)
-                except ValueError:
-                    continue
-            
-            raise ValueError(f"Unable to parse timestamp: {timestamp}")
+    def _parse_timestamp(self, timestamp: str) -> datetime:
+        """Parse timestamp string to datetime object."""
+        # Handle common formats
+        formats = [
+            '%Y-%m-%d %H:%M:%S',
+            '%Y-%m-%d %H:%M:%S.%f',
+            '%Y-%m-%dT%H:%M:%S',
+            '%Y-%m-%dT%H:%M:%S.%f'
+        ]
+        
+        for fmt in formats:
+            try:
+                return datetime.strptime(str(timestamp), fmt)
+            except ValueError:
+                continue
+        
+        raise ValueError(f"Unable to parse timestamp: {timestamp}")
