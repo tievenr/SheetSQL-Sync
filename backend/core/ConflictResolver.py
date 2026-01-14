@@ -68,8 +68,26 @@ class ConflictResolver:
                 # Keep the newer change (last-write-wins)
                 if mysql_dt >= sheets_dt:
                     resolved_mysql.append(mysql_change)
+                    logger.warning("conflict_detected_lww", 
+                                  pk=pk, 
+                                  winner="mysql",
+                                  mysql_timestamp=str(mysql_dt),
+                                  sheets_timestamp=str(sheets_dt),
+                                  time_diff_seconds=(mysql_dt - sheets_dt).total_seconds(),
+                                  discarded_source="sheets",
+                                  discarded_data=sheets_change.data,
+                                  kept_data=mysql_change.data)
                 else:
                     resolved_sheets.append(sheets_change)
+                    logger.warning("conflict_detected_lww",
+                                  pk=pk, 
+                                  winner="sheets",
+                                  sheets_timestamp=str(sheets_dt),
+                                  mysql_timestamp=str(mysql_dt),
+                                  time_diff_seconds=(sheets_dt - mysql_dt).total_seconds(),
+                                  discarded_source="mysql",
+                                  discarded_data=mysql_change.data,
+                                  kept_data=sheets_change.data)
                 
                 conflicts_resolved += 1
                 
