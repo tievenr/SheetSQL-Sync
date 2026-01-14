@@ -224,3 +224,38 @@ class SyncEngine:
             self.status.is_running = False
             self.status.last_error = str(e)
             raise
+
+    def start(self) -> None:
+        """Start the sync engine."""
+        if self.status.is_running:
+            logger.warning("sync_already_running")
+            return
+        
+        logger.info("sync_engine_starting")
+        
+        # Perform initial sync
+        self._initial_sync()
+        
+        # Start continuous sync loop
+        self.status.is_running = True
+        
+        try:
+            while self.status.is_running:
+                self._sync_cycle()
+                time.sleep(self.sync_interval)
+                
+        except KeyboardInterrupt:
+            logger.info("sync_engine_interrupted")
+            self.stop()
+        except Exception as e:
+            logger.error("sync_engine_error", error=str(e))
+            self.stop()
+            raise
+
+
+    def stop(self) -> None:
+        """Stop the sync engine."""
+        logger.info("sync_engine_stopping",
+                total_syncs=self.status.sync_count,
+                conflicts_resolved=self.status.conflicts_resolved)
+        self.status.is_running = False
