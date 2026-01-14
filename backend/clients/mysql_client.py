@@ -54,3 +54,14 @@ class MySQLClient:
         except Exception as e:
             logger.error("mysql_connection_failed", error=str(e), host=self.host)
             raise
+    
+    def get_all_data(self)->pd.DataFrame:
+        """Fetch all data from the table as a DataFrame."""
+        try: 
+            query= f"SELECT * FROM {self.table}"
+            df= pd.read_sql(query,self.engine)
+            logger.info("mysql_data_fetched",rows=len(df), table=self.table)
+            return df
+        except Exception as e: 
+            logger.error("mysql_fetch_failed", error=str(e), table=self.table)
+            raise
