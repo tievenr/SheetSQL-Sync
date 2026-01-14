@@ -217,9 +217,9 @@ class SyncEngine:
             self._apply_changes(resolved_sheets, target="mysql")
             self._apply_changes(resolved_mysql, target="sheets")
             
-            # 5. Update snapshots
-            self.mysql_snapshot = current_mysql.copy()
-            self.sheets_snapshot = current_sheets.copy()
+            # 5. Update snapshots (re-fetch to get current state including our changes)
+            self.mysql_snapshot = self.mysql_client.get_all_data()
+            self.sheets_snapshot = self.sheets_client.get_all_data()
             
             # Update status
             self.status.last_sync_time = datetime.now()
