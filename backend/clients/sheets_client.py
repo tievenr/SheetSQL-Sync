@@ -238,8 +238,10 @@ class SheetsClient:
             # Clear existing data first
             self.clear_all()
             
+            # Convert all values to strings to handle Timestamp objects
+            df_copy = df.astype(str)
             # Convert DataFrame to list of lists
-            values = df.values.tolist()
+            values = df_copy.values.tolist()
             
             # Write all rows at once
             self.service.spreadsheets().values().update(
