@@ -1,6 +1,7 @@
 from backend.clients.mysql_client import MySQLClient
 from backend.clients.sheets_client import SheetsClient
 from backend.core.sync_engine import SyncEngine
+from datetime import datetime
 import time
 
 print("=" * 60)
@@ -29,10 +30,24 @@ print("   - Then syncing every 5 seconds")
 print("   - Press Ctrl+C to stop")
 print("   - Edit data in MySQL or Sheets to see sync in action!\n")
 
+# Instead of engine.start(), let's run the loop manually with prints
+engine._initial_sync()
+print("✅ Initial sync complete!")
+print(f"   MySQL: {len(mysql_client.get_all_data())} rows")
+print(f"   Sheets: {len(sheets_client.get_all_data())} rows")
+
+engine.status.is_running = True
+
 try:
-    # Start sync (runs forever until interrupted)
-    engine.start()
-    
+    while engine.status.is_running:
+        print(f"\n⏱️  [{datetime.now().strftime('%H:%M:%S')}] Running sync cycle #{engine.status.sync_count + 1}...")
+        
+        engine._sync_cycle()
+        
+        print(f"   ✅ Sync complete | MySQL: {len(mysql_client.get_all_data())} | Sheets: {len(sheets_client.get_all_data())}")
+        
+        time.sleep(engine.sync_interval)
+        
 except KeyboardInterrupt:
     print("\n\n⏹️  Stopping sync engine...")
     engine.stop()

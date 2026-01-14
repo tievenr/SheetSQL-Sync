@@ -171,7 +171,8 @@ class SheetsClient:
             # Build row values in correct column order
             row_values = []
             for header in headers:
-                row_values.append(data.get(header, ''))  # Empty string if not provided
+                value = data.get(header, '')
+                row_values.append(str(value) if value != '' else '')
             
             # Append row to end
             self.service.spreadsheets().values().append(
