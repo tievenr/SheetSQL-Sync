@@ -216,7 +216,7 @@ class SheetsClient:
         # Clear from row 2 onwards (keep header)
         self.service.spreadsheets().values().clear(
             spreadsheetId=self.sheet_id,
-            range='A1:Z'  # ← BUG: Clears header too!
+            range='A2:Z'  
         ).execute()
         
         logger.info("sheets_cleared", sheet_id=self.sheet_id[:20])
