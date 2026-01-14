@@ -60,3 +60,47 @@ class SyncEngine:
         logger.info("sync_engine_initialized", 
                    sync_interval=sync_interval,
                    initial_sync_source=initial_sync_source)
+    
+
+    def _initial_sync(self) -> None:
+        """
+        Perform initial sync on startup.
+        Copies all data from source to target system.
+        """
+        try:
+            if self.initial_sync_source == "mysql":
+                logger.info("initial_sync_start", source="mysql", target="sheets")
+                
+                # Get all data from MySQL
+                mysql_df = self.mysql_client.get_all_data()
+                
+                # Write to Sheets
+                self.sheets_client.write_all(mysql_df)
+                
+                # Initialize snapshots
+                self.mysql_snapshot = mysql_df.copy()
+                self.sheets_snapshot = mysql_df.copy()
+                
+                logger.info("initial_sync_complete", source="mysql", rows=len(mysql_df))
+                
+            elif self.initial_sync_source == "sheets":
+                logger.info("initial_sync_start", source="sheets", target="mysql")
+                
+                # Get all data from Sheets
+                sheets_df = self.sheets_client.get_all_data()
+                
+                # Write to MySQL
+                self.mysql_client.write_all(sheets_df)
+                
+                # Initialize snapshots
+                self.mysql_snapshot = sheets_df.copy()
+                self.sheets_snapshot = sheets_df.copy()
+                
+                logger.info("initial_sync_complete", source="sheets", rows=len(sheets_df))
+                
+            else:
+                raise ValueError(f"Invalid initial_sync_source: {self.initial_sync_source}")
+                
+        except Exception as e:
+            logger.error("initial_sync_failed", error=str(e))
+            raise
