@@ -40,3 +40,34 @@ class SheetsClient:
         
         logger.info("sheets_client_initialized", sheet_id=self.sheet_id[:20], 
                     primary_key=self.primary_key_column)
+    
+
+    def _authenticate(self):
+        """Handle OAuth2 authentication and return Sheets service."""
+        creds = None
+        
+        # Check if token exists
+        if os.path.exists(self.token_path):
+            with open(self.token_path, 'rb') as token:
+                creds = pickle.load(token)
+        
+        # If no valid credentials, get new ones
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                # Auto-refresh expired token
+                creds.refresh(Request())
+            else:
+                # Open browser for login
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    self.credentials_path, SCOPES
+                )
+                creds = flow.run_local_server(port=0)
+            
+            # Save token for next time
+            with open(self.token_path, 'wb') as token:
+                pickle.dump(creds, token)
+        
+        # Build Sheets API service
+        service = build('sheets', 'v4', credentials=creds)
+        logger.info("sheets_authenticated", token_exists=os.path.exists(self.token_path))
+        return service
