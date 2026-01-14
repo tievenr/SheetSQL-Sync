@@ -44,5 +44,58 @@ class ConflictResolver:
                 resolved_mysql.append(change)
         
         #Resolve conflicts
+        conflicts_resolved = 0
+        
+        for pk in conflicting_pks:
+            sheets_change = sheets_by_pk[pk]
+            mysql_change = mysql_by_pk[pk]
+            
+            # Extract timestamps from data
+            sheets_timestamp = sheets_change.data.get(self.timestamp_col)
+            mysql_timestamp = mysql_change.data.get(self.timestamp_col)
+            
+            # Handle missing timestamps
+            if not sheets_timestamp or not mysql_timestamp:
+                logger.warning("conflict_missing_timestamp", pk=pk)
+                resolved_mysql.append(mysql_change)
+                continue
+            
+            # Parse and compare timestamps
+            try:
+                sheets_dt = self._parse_timestamp(sheets_timestamp)
+                mysql_dt = self._parse_timestamp(mysql_timestamp)
+                
+                # Keep the newer change (last-write-wins)
+                if mysql_dt >= sheets_dt:
+                    resolved_mysql.append(mysql_change)
+                else:
+                    resolved_sheets.append(sheets_change)
+                
+                conflicts_resolved += 1
+                
+            except Exception as e:
+                logger.error("conflict_resolution_failed", pk=pk, error=str(e))
+                resolved_mysql.append(mysql_change)
+        
+        logger.info("conflicts_summary", total=len(conflicting_pks), resolved=conflicts_resolved)
         
         return resolved_sheets, resolved_mysql
+
+
+        def _parse_timestamp(self, timestamp: str) -> datetime:
+            """Parse timestamp string to datetime object."""
+            # Handle common formats
+            formats = [
+                '%Y-%m-%d %H:%M:%S',
+                '%Y-%m-%d %H:%M:%S.%f',
+                '%Y-%m-%dT%H:%M:%S',
+                '%Y-%m-%dT%H:%M:%S.%f'
+            ]
+            
+            for fmt in formats:
+                try:
+                    return datetime.strptime(str(timestamp), fmt)
+                except ValueError:
+                    continue
+            
+            raise ValueError(f"Unable to parse timestamp: {timestamp}")
