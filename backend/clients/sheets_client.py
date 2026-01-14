@@ -100,3 +100,20 @@ class SheetsClient:
         except HttpError as e:
             logger.error("sheets_fetch_failed", error=str(e), sheet_id=self.sheet_id[:20])
             raise
+    
+    def _find_row_by_pk(self, pk_value: Any) -> int:
+        """Find the row number for a given primary key value."""
+        try:
+            df = self.get_all_data()
+            
+            # Find row where primary key matches
+            for idx, row in df.iterrows():
+                if str(row[self.primary_key_column]) == str(pk_value):
+                    # +2 because: DataFrame is 0-indexed, and row 1 is header
+                    return idx + 2
+            
+            raise ValueError(f"No row found with {self.primary_key_column}={pk_value}")
+            
+        except Exception as e:
+            logger.error("sheets_find_row_failed", pk=pk_value, error=str(e))
+            raise
