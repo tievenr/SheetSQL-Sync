@@ -31,6 +31,33 @@ class ChangeDetector:
         if old_df.empty and new_df.empty:
             return changes
         
+        # Step 5: Validate primary key column exists
+        if not old_df.empty and self.pk_col not in old_df.columns:
+            raise ValueError(
+                f"Primary key column '{self.pk_col}' not found in old DataFrame. "
+                f"Available columns: {list(old_df.columns)}"
+            )
+        if not new_df.empty and self.pk_col not in new_df.columns:
+            raise ValueError(
+                f"Primary key column '{self.pk_col}' not found in new DataFrame. "
+                f"Available columns: {list(new_df.columns)}"
+            )
+        
+        #Detect duplicate primary keys
+        if not old_df.empty:
+            old_duplicates = old_df[old_df[self.pk_col].duplicated()][self.pk_col].tolist()
+            if old_duplicates:
+                logger.warning("duplicate_pks_detected", 
+                            source="old_snapshot", 
+                            duplicates=old_duplicates)
+        
+        if not new_df.empty:
+            new_duplicates = new_df[new_df[self.pk_col].duplicated()][self.pk_col].tolist()
+            if new_duplicates:
+                logger.warning("duplicate_pks_detected", 
+                            source="new_data", 
+                            duplicates=new_duplicates)
+        
         # Extract primary keys as sets
         old_pks = set(old_df[self.pk_col].astype(str)) if not old_df.empty else set()
         new_pks = set(new_df[self.pk_col].astype(str)) if not new_df.empty else set()
