@@ -65,3 +65,20 @@ class MySQLClient:
         except Exception as e: 
             logger.error("mysql_fetch_failed", error=str(e), table=self.table)
             raise
+
+    def insert_row(self,data:Dict[str,Any])->int:
+        """Insert a row into the table """
+        try:
+            columns=','.join(data.keys())
+            placeholders=','.join([f":{key}" for key in data.keys()]) # ts is to prevent SQL Injection so think of it as a way to no explicitly pass values as code
+            query = f"INSERT INTO {self.table}({columns}) VALUES({placeholders})"
+            
+            with self.engine.begin() as conn:
+                result=conn.execute(text(query),data)
+                new_id=result.lastrowid
+
+            logger.info("mysql_row_inserted",table=self.table, id=new_id)
+            return new_id
+        except Exception as e:
+            logger.error("mysql_insert_failed", error=str(e),table=self.table)
+            raise
