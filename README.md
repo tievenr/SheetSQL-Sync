@@ -117,21 +117,8 @@ This will:
 - Initialize the `synced_data` table with sample data
 - Expose MySQL on port 3306
 
-### 6. Run the Demo (No Setup Required!)
 
-Try the interactive demo first to see the system in action without any configuration:
-
-```bash
-python demo.py
-```
-
-This simulates the entire sync workflow with mock data, showcasing:
-- Initial synchronization
-- Bidirectional changes
-- Conflict resolution
-- Error handling
-
-### 7. Run the Real Sync Engine
+### 6. Run the Real Sync Engine
 
 Once you've configured everything:
 
