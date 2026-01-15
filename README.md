@@ -247,8 +247,8 @@ docker exec -it sheets_mysql_sync_db mysql -uroot -prootpassword syncdb -e "SELE
 1. Open your Google Sheet in a browser
 2. Make changes directly in the spreadsheet:
    - Edit a name or email in any row
-   - Add a new row at the bottom
    - Delete a row
+   - Add a new row at the bottom
 3. Watch the terminal where `test_sync_engine.py` is running
 4. Within 5 seconds, your changes should sync to MySQL
 
