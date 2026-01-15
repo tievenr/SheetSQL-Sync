@@ -275,87 +275,6 @@ docker exec -it sheets_mysql_sync_db mysql -uroot -prootpassword syncdb -e "UPDA
 
 3. **Watch the sync logs:** The version with the newer `last_modified` timestamp wins!
 
-#### 6. Check Sync Logs
-
-```bash
-# View today's log
-tail -f logs/sync_$(date +%Y-%m-%d).log
-
-# Search for specific events
-grep "conflict" logs/sync_$(date +%Y-%m-%d).log
-grep "error" logs/sync_$(date +%Y-%m-%d).log
-
-# Count sync cycles
-grep "sync_cycle_complete" logs/sync_$(date +%Y-%m-%d).log | wc -l
-```
-
-#### 7. Docker Management Commands
-
-**Check if MySQL container is running:**
-```bash
-docker ps | grep sheets_mysql_sync_db
-```
-
-**View container logs:**
-```bash
-docker logs sheets_mysql_sync_db
-```
-
-**Restart the container:**
-```bash
-docker-compose restart
-```
-
-**Stop the container:**
-```bash
-docker-compose down
-```
-
-**Start fresh (deletes all data):**
-```bash
-docker-compose down -v
-docker-compose up -d
-```
-
-**Check container health:**
-```bash
-docker inspect sheets_mysql_sync_db | grep -A 5 Health
-```
-
-**Access MySQL shell interactively:**
-```bash
-docker exec -it sheets_mysql_sync_db mysql -uroot -prootpassword
-```
-
-Then inside MySQL:
-```sql
-USE syncdb;
-SHOW TABLES;
-DESCRIBE synced_data;
-SELECT * FROM synced_data;
-EXIT;
-```
-
-### Quick Demo Script
-
-If you want a quick automated demo without manual testing:
-
-```bash
-python demo.py
-```
-
-This runs through all features with simulated data (no live MySQL/Sheets required).
-
-### Run End-to-End Tests
-
-```bash
-python test_sync_engine.py
-```
-
-This runs a real sync with live MySQL and Sheets connections. Make sure to:
-- Start Docker MySQL container first
-- Have `credentials.json` configured
-- Set your Sheet ID in `.env`
 
 ## 📁 Project Structure
 
@@ -414,59 +333,6 @@ The default schema includes:
 
 **Note**: The `last_modified` column is critical for conflict resolution. It must be present and automatically updated.
 
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**1. "ModuleNotFoundError: No module named 'backend'"**
-```bash
-# Make sure you're in the project root and installed dependencies
-pip install -r requirements.txt
-```
-
-**2. "MySQL connection failed"**
-```bash
-# Ensure Docker is running
-docker-compose up -d
-
-# Check container status
-docker ps
-```
-
-**3. "Google Sheets API authentication failed"**
-- Verify `credentials.json` is in the project root
-- Delete `token.json` and re-authenticate
-- Ensure Sheets API is enabled in Google Cloud Console
-
-**4. "Primary key column 'id' not found"**
-- Ensure your Google Sheet has headers in row 1
-- Check that column names match exactly (case-sensitive)
-
-**5. Sync detects conflicts on every cycle**
-- Check that `last_modified` timestamps are being updated
-- Ensure MySQL table has `ON UPDATE CURRENT_TIMESTAMP` for the timestamp column
-
-### Logs
-
-Check the logs directory for detailed error information:
-
-```bash
-tail -f logs/sync_$(date +%Y-%m-%d).log
-```
-
-Logs are JSON-formatted for easy parsing:
-
-```json
-{
-  "timestamp": "2026-01-15T10:30:45.123456",
-  "level": "info",
-  "event": "sync_cycle_complete",
-  "sync_count": 42,
-  "mysql_changes": 2,
-  "sheets_changes": 1,
-  "conflicts": 0
-}
-```
 
 ## 🤝 Contributing
 
@@ -480,30 +346,10 @@ Contributions are welcome! Here's how to get started:
 6. Push to the branch: `git push origin feature/amazing-feature`
 7. Open a Pull Request
 
-### Development Guidelines
-
-- Follow PEP 8 style guide
-- Add docstrings to all functions and classes
-- Update tests for new features
-- Use structured logging (via `logger.info()`, etc.)
-- Handle errors gracefully
 
 ## 📜 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Built with [SQLAlchemy](https://www.sqlalchemy.org/) for database operations
-- Uses [Google Sheets API v4](https://developers.google.com/sheets/api) for spreadsheet access
-- Structured logging powered by [structlog](https://www.structlog.org/)
-- Inspired by the need to bridge technical and non-technical workflows
-
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/yourusername/google-sheets-mysql-sync/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/google-sheets-mysql-sync/discussions)
-- **Email**: your.email@example.com
 
 ---
 
