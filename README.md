@@ -8,13 +8,13 @@ A robust, production-ready Python system that automatically synchronizes data be
 
 ## 🌟 Features
 
-- **🔄 Bidirectional Sync**: Changes in either MySQL or Google Sheets are automatically reflected in the other
-- **⚡ Real-time Updates**: Configurable sync intervals (default: 5 seconds) ensure near-instant data consistency
-- **🤝 Smart Conflict Resolution**: Timestamp-based "last-write-wins" strategy handles simultaneous edits
-- **🛡️ Error Resilience**: Gracefully handles network issues, incomplete data, and API failures
-- **📊 Status Tracking**: Monitor sync cycles, conflicts resolved, and error states
-- **🔍 Change Detection**: Efficiently detects INSERT, UPDATE, and DELETE operations
-- **📝 Structured Logging**: JSON-formatted logs for easy debugging and monitoring
+- ** Bidirectional Sync**: Changes in either MySQL or Google Sheets are automatically reflected in the other
+- ** Real-time Updates**: Configurable sync intervals (default: 5 seconds) ensure near-instant data consistency
+- ** Smart Conflict Resolution**: Timestamp-based "last-write-wins" strategy handles simultaneous edits
+- ** Error Resilience**: Gracefully handles network issues, incomplete data, and API failures
+- ** Status Tracking**: Monitor sync cycles, conflicts resolved, and error states
+- ** Change Detection**: Efficiently detects INSERT, UPDATE, and DELETE operations
+- ** Structured Logging**: JSON-formatted logs for easy debugging and monitoring
 
 ## 🏗️ Architecture
 
@@ -40,14 +40,14 @@ A robust, production-ready Python system that automatically synchronizes data be
 - **Change Detector**: Compares data snapshots to identify deltas (INSERT/UPDATE/DELETE)
 - **Conflict Resolver**: Resolves conflicts using timestamp-based last-write-wins strategy
 
-## 📋 Prerequisites
+##  Prerequisites
 
 - **Python 3.8+**
 - **Docker & Docker Compose** (for MySQL)
 - **Google Cloud Project** with Sheets API enabled
 - **OAuth 2.0 Credentials** from Google Cloud Console
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### 1. Clone the Repository
 
@@ -132,7 +132,7 @@ The sync engine will:
 3. Display real-time status updates
 4. Press `Ctrl+C` to stop gracefully
 
-## 📖 Usage Examples
+##  Usage Examples
 
 ### Basic Sync Setup
 
@@ -191,7 +191,7 @@ print(f"Conflicts resolved: {status.conflicts_resolved}")
 print(f"Last error: {status.last_error}")
 ```
 
-## 🧪 Testing
+##  Testing
 
 ### Manual Testing (Recommended)
 
@@ -276,7 +276,7 @@ docker exec -it sheets_mysql_sync_db mysql -uroot -prootpassword syncdb -e "UPDA
 3. **Watch the sync logs:** The version with the newer `last_modified` timestamp wins!
 
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 google-sheets-mysql-sync/
@@ -303,7 +303,7 @@ google-sheets-mysql-sync/
 └── README.md                    # This file
 ```
 
-## 🔧 Configuration Options
+##  Configuration Options
 
 ### Environment Variables
 
@@ -334,7 +334,7 @@ The default schema includes:
 **Note**: The `last_modified` column is critical for conflict resolution. It must be present and automatically updated.
 
 
-## 🤝 Contributing
+##  Contributing
 
 Contributions are welcome! Here's how to get started:
 
@@ -347,7 +347,7 @@ Contributions are welcome! Here's how to get started:
 7. Open a Pull Request
 
 
-## 📜 License
+##  License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
