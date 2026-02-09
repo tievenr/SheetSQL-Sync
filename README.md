@@ -8,13 +8,13 @@ A robust, production-ready Python system that automatically synchronizes data be
 
 ## 🌟 Features
 
-- ** Bidirectional Sync**: Changes in either MySQL or Google Sheets are automatically reflected in the other
-- ** Real-time Updates**: Configurable sync intervals (default: 5 seconds) ensure near-instant data consistency
-- ** Smart Conflict Resolution**: Timestamp-based "last-write-wins" strategy handles simultaneous edits
-- ** Error Resilience**: Gracefully handles network issues, incomplete data, and API failures
-- ** Status Tracking**: Monitor sync cycles, conflicts resolved, and error states
-- ** Change Detection**: Efficiently detects INSERT, UPDATE, and DELETE operations
-- ** Structured Logging**: JSON-formatted logs for easy debugging and monitoring
+-  Bidirectional Sync: Changes in either MySQL or Google Sheets are automatically reflected in the other
+-  Real-time Updates: Configurable sync intervals (default: 5 seconds) ensure near-instant data consistency
+-  Smart Conflict Resolution**: Timestamp-based "last-write-wins" strategy handles simultaneous edits
+-  Error Resilience: Gracefully handles network issues, incomplete data, and API failures
+-  Status Tracking: Monitor sync cycles, conflicts resolved, and error states
+-  Change Detection: Efficiently detects INSERT, UPDATE, and DELETE operations
+-  Structured Logging: JSON-formatted logs for easy debugging and monitoring
 
 ## 🏗️ Architecture
 
